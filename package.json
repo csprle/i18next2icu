@@ -1,6 +1,6 @@
 {
   "name": "i18next2icu",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Convert i18next JSON/YAML translation files to ICU MessageFormat v1",
   "main": "src/index.js",
   "bin": {
