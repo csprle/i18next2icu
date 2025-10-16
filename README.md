@@ -222,19 +222,6 @@ See `.github/workflows/test.yml` for CI configuration.
 
 This package uses automated publishing via GitHub Actions.
 
-### Prerequisites
-
-1. Create an npm account at [npmjs.com](https://www.npmjs.com) if you don't have one
-2. Generate an npm access token:
-   - Go to npmjs.com → Account → Access Tokens
-   - Click "Generate New Token" → Choose "Automation" type
-   - Copy the token
-3. Add the token to GitHub repository secrets:
-   - Go to your GitHub repository → Settings → Secrets and variables → Actions
-   - Click "New repository secret"
-   - Name: `NPM_TOKEN`
-   - Value: Your npm token
-
 ### Versioning and Publishing
 
 The project follows [Semantic Versioning](https://semver.org/):
