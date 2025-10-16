@@ -1,0 +1,12 @@
+{
+  "welcome": "Welcome back, {username}!",
+  "goodbye": "See you later, {username}!",
+  "user": {
+    "profile": {
+      "title": "User Profile",
+      "greeting": "Hello, {name}!"
+    }
+  },
+  "messages": "{count, plural, =0{You have no new messages} one{You have {count} new message} other{You have {count} new messages}}",
+  "items": "{count, plural, =0{No items in cart} one{{count} item in cart} other{{count} items in cart}}"
+}

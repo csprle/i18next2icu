@@ -1,0 +1,14 @@
+{
+  "user": {
+    "profile": {
+      "name": "{{username}}",
+      "email": "{{email}}"
+    },
+    "settings": {
+      "language": "Language: {{lang}}"
+    }
+  },
+  "notification_zero": "No notifications",
+  "notification_one": "{{count}} notification",
+  "notification_other": "{{count}} notifications"
+}

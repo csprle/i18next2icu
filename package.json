@@ -1,0 +1,34 @@
+{
+  "name": "i18next2icu",
+  "version": "1.0.0",
+  "description": "Convert i18next JSON translation files to ICU MessageFormat v1",
+  "main": "src/index.js",
+  "bin": {
+    "i18next2icu": "./bin/cli.js"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "node bin/cli.js",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "i18next",
+    "icu",
+    "messageformat",
+    "translation",
+    "internationalization",
+    "i18n",
+    "converter"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "glob": "^10.3.10",
+    "ora": "^8.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
