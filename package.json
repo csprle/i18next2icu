@@ -9,7 +9,12 @@
   "type": "module",
   "scripts": {
     "start": "node bin/cli.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "version:patch": "npm version patch -m \"Bump version to %s\"",
+    "version:minor": "npm version minor -m \"Bump version to %s\"",
+    "version:major": "npm version major -m \"Bump version to %s\"",
+    "prepublishOnly": "npm test",
+    "postversion": "git push && git push --tags"
   },
   "keywords": [
     "i18next",
@@ -30,5 +35,13 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/csprle/i18next2icu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/csprle/i18next2icu/issues"
+  },
+  "homepage": "https://github.com/csprle/i18next2icu#readme"
 }

@@ -218,6 +218,69 @@ Tests run automatically on:
 
 See `.github/workflows/test.yml` for CI configuration.
 
+## Publishing
+
+This package uses automated publishing via GitHub Actions.
+
+### Prerequisites
+
+1. Create an npm account at [npmjs.com](https://www.npmjs.com) if you don't have one
+2. Generate an npm access token:
+   - Go to npmjs.com → Account → Access Tokens
+   - Click "Generate New Token" → Choose "Automation" type
+   - Copy the token
+3. Add the token to GitHub repository secrets:
+   - Go to your GitHub repository → Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `NPM_TOKEN`
+   - Value: Your npm token
+
+### Versioning and Publishing
+
+The project follows [Semantic Versioning](https://semver.org/):
+
+```bash
+# Patch release (bug fixes): 1.0.0 → 1.0.1
+npm run version:patch
+
+# Minor release (new features, backwards compatible): 1.0.0 → 1.1.0
+npm run version:minor
+
+# Major release (breaking changes): 1.0.0 → 2.0.0
+npm run version:major
+```
+
+**What happens when you run these commands:**
+
+1. Tests run automatically (`prepublishOnly`)
+2. Version number bumps in `package.json`
+3. Git commit is created with version bump
+4. Git tag is created (e.g., `v1.0.1`)
+5. Changes are pushed to GitHub
+6. Tag is pushed to GitHub
+7. GitHub Action triggers automatically
+8. Tests run in CI
+9. Package publishes to npm
+10. GitHub Release is created
+
+### Manual Publishing (alternative)
+
+If you prefer to publish manually:
+
+```bash
+# Make sure you're logged in
+npm login
+
+# Publish to npm
+npm publish
+```
+
+### Before Publishing
+
+- Update `CHANGELOG.md` with your changes
+- Ensure all tests pass: `npm test`
+- Review changes: `git status` and `git diff`
+
 ## License
 
 MIT
