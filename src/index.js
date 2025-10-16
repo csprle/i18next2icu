@@ -38,7 +38,13 @@ function stringifyData(data, format) {
     return yaml.dump(data, {
       indent: 2,
       lineWidth: -1,
-      noRefs: true
+      noRefs: true,
+      quotingType: '"',
+      forceQuotes: false,
+      flowLevel: -1,
+      styles: {
+        '!!null': 'canonical' // represent null as ~
+      }
     });
   }
   return JSON.stringify(data, null, 2) + '\n';

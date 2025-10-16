@@ -290,6 +290,66 @@ describe('Integration tests', () => {
       assert.ok(output.item.includes('plural'));
       assert.ok(output.item.includes('=0{No items}'));
     });
+
+    test('converts YAML with multiline strings', async () => {
+      const inputPath = join(tmpDir, 'test-yaml-multiline.yaml');
+      const input = {
+        welcome: 'Hello {{name}},\nWelcome to our platform!\nWe are glad you are here.',
+        description: 'This is a multi-line description.\nIt spans multiple lines.\nVariables like {{count}} work too.'
+      };
+
+      await writeFile(inputPath, yaml.dump(input));
+
+      const result = await processFile(inputPath);
+
+      assert.strictEqual(result.success, true);
+
+      const output = yaml.load(await readFile(inputPath, 'utf-8'));
+      assert.ok(output.welcome.includes('{name}'), 'Should convert variable');
+      assert.ok(output.welcome.includes('\n'), 'Should preserve newlines');
+      assert.ok(output.description.includes('{count}'), 'Should convert variable in multiline');
+    });
+
+    test('converts multiline YAML plurals', async () => {
+      const inputPath = join(tmpDir, 'test-yaml-multiline-plurals.yaml');
+      const input = {
+        notification_zero: 'No new messages',
+        notification_one: 'You have {{count}} new message.\nPlease check your inbox.',
+        notification_other: 'You have {{count}} new messages.\nPlease check your inbox.'
+      };
+
+      await writeFile(inputPath, yaml.dump(input));
+
+      const result = await processFile(inputPath);
+
+      assert.strictEqual(result.success, true);
+
+      const output = yaml.load(await readFile(inputPath, 'utf-8'));
+      assert.ok(output.notification, 'Should create notification key');
+      assert.ok(output.notification.includes('plural'), 'Should have plural format');
+      assert.ok(output.notification.includes('{count}'), 'Should convert variables');
+    });
+
+    test('converts nested multiline YAML', async () => {
+      const inputPath = join(tmpDir, 'test-yaml-nested-multiline.yaml');
+      const input = {
+        error: {
+          title: 'Error occurred',
+          message: 'An error has occurred: {{errorMessage}}\nPlease try again later.'
+        }
+      };
+
+      await writeFile(inputPath, yaml.dump(input));
+
+      const result = await processFile(inputPath);
+
+      assert.strictEqual(result.success, true);
+
+      const output = yaml.load(await readFile(inputPath, 'utf-8'));
+      assert.strictEqual(output.error.title, 'Error occurred');
+      assert.ok(output.error.message.includes('{errorMessage}'));
+      assert.ok(output.error.message.includes('\n'));
+    });
   });
 
   describe('Real fixture conversions', () => {

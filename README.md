@@ -192,6 +192,48 @@ user:
   farewell: Goodbye {name}
 ```
 
+### Multiline YAML Strings
+
+The converter fully supports multiline YAML strings using literal block scalars (`|`):
+
+**i18next format (YAML):**
+```yaml
+welcome: |
+  Hello {{name}},
+  Welcome to our platform!
+  We're glad you're here.
+error:
+  message: |
+    An error has occurred: {{errorMessage}}
+    Please try again later.
+notification_one: |
+  You have {{count}} new message.
+  Please check your inbox.
+notification_other: |
+  You have {{count}} new messages.
+  Please check your inbox.
+```
+
+**ICU format (YAML):**
+```yaml
+welcome: |
+  Hello {name},
+  Welcome to our platform!
+  We're glad you're here.
+error:
+  message: |
+    An error has occurred: {errorMessage}
+    Please try again later.
+notification: >-
+  {count, plural, one{You have {count} new message.
+
+  Please check your inbox.} other{You have {count} new messages.
+
+  Please check your inbox.}}
+```
+
+Newlines and formatting are preserved during conversion, making it easy to work with multi-paragraph translations.
+
 ### Format Conversion
 
 You can also convert between JSON and YAML:
@@ -213,6 +255,7 @@ i18next2icu ./locales -o ./converted
 - ✅ Plural forms: `key_zero`, `key_one`, `key_other` → ICU plural syntax
 - ✅ Nested objects and deep structures
 - ✅ JSON and YAML file formats
+- ✅ Multiline YAML strings with preserved formatting
 - ✅ Format conversion (JSON ↔ YAML)
 - ✅ Multiple files and directories
 - ⚠️ Nesting references: `$t(key)` → Converted to `[REF:key]` (requires manual handling)

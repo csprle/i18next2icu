@@ -1,0 +1,19 @@
+welcome: |
+  Hello {name},
+  Welcome to our platform!
+  We're glad you're here.
+description: |
+  This is a multi-line description.
+  It spans multiple lines.
+  Variables like {count} work too.
+notification: >-
+  {count, plural, =0{No new messages} one{You have {count} new message.
+
+  Please check your inbox.} other{You have {count} new messages.
+
+  Please check your inbox.}}
+error:
+  title: Error occurred
+  message: |
+    An error has occurred: {errorMessage}
+    Please try again later.
