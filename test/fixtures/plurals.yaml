@@ -1,0 +1,3 @@
+item_zero: No items
+item_one: '{{count}} item'
+item_other: '{{count}} items'

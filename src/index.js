@@ -1,7 +1,48 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { glob } from 'glob';
+import yaml from 'js-yaml';
 import { convertFile } from './converter.js';
+
+/**
+ * Detect file format based on extension
+ * @param {string} filePath - File path
+ * @returns {string} 'json' or 'yaml'
+ */
+function detectFileFormat(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  return (ext === '.yaml' || ext === '.yml') ? 'yaml' : 'json';
+}
+
+/**
+ * Parse file content based on format
+ * @param {string} content - File content
+ * @param {string} format - 'json' or 'yaml'
+ * @returns {Object} Parsed data
+ */
+function parseContent(content, format) {
+  if (format === 'yaml') {
+    return yaml.load(content);
+  }
+  return JSON.parse(content);
+}
+
+/**
+ * Stringify data based on format
+ * @param {Object} data - Data to stringify
+ * @param {string} format - 'json' or 'yaml'
+ * @returns {string} Stringified data
+ */
+function stringifyData(data, format) {
+  if (format === 'yaml') {
+    return yaml.dump(data, {
+      indent: 2,
+      lineWidth: -1,
+      noRefs: true
+    });
+  }
+  return JSON.stringify(data, null, 2) + '\n';
+}
 
 /**
  * Process a single file
@@ -11,20 +52,24 @@ import { convertFile } from './converter.js';
  */
 export async function processFile(inputPath, outputPath = null) {
   try {
+    // Detect input format
+    const inputFormat = detectFileFormat(inputPath);
+
     // Read the input file
     const content = await fs.readFile(inputPath, 'utf-8');
-    const data = JSON.parse(content);
+    const data = parseContent(content, inputFormat);
 
     // Convert the data
     const converted = convertFile(data);
 
-    // Determine output path
+    // Determine output path and format
     const finalOutputPath = outputPath || inputPath;
+    const outputFormat = detectFileFormat(finalOutputPath);
 
     // Write the output file
     await fs.writeFile(
       finalOutputPath,
-      JSON.stringify(converted, null, 2) + '\n',
+      stringifyData(converted, outputFormat),
       'utf-8'
     );
 
@@ -32,7 +77,9 @@ export async function processFile(inputPath, outputPath = null) {
       success: true,
       inputPath,
       outputPath: finalOutputPath,
-      inPlace: !outputPath
+      inPlace: !outputPath,
+      inputFormat,
+      outputFormat
     };
   } catch (error) {
     return {
@@ -44,25 +91,33 @@ export async function processFile(inputPath, outputPath = null) {
 }
 
 /**
- * Find all JSON files in a directory
+ * Find all translation files (JSON and YAML) in a directory
  * @param {string} inputPath - Directory path or glob pattern
  * @returns {Promise<string[]>} Array of file paths
  */
-export async function findJsonFiles(inputPath) {
+export async function findTranslationFiles(inputPath) {
   const stats = await fs.stat(inputPath).catch(() => null);
 
   if (stats && stats.isFile()) {
     // Single file
     return [inputPath];
   } else if (stats && stats.isDirectory()) {
-    // Directory - find all JSON files
-    const pattern = path.join(inputPath, '**/*.json');
-    return await glob(pattern, { nodir: true });
+    // Directory - find all JSON and YAML files
+    const jsonPattern = path.join(inputPath, '**/*.json');
+    const yamlPattern = path.join(inputPath, '**/*.{yaml,yml}');
+    const [jsonFiles, yamlFiles] = await Promise.all([
+      glob(jsonPattern, { nodir: true }),
+      glob(yamlPattern, { nodir: true })
+    ]);
+    return [...jsonFiles, ...yamlFiles].sort();
   } else {
     // Treat as glob pattern
     return await glob(inputPath, { nodir: true });
   }
 }
+
+// Maintain backward compatibility
+export const findJsonFiles = findTranslationFiles;
 
 /**
  * Process multiple files
@@ -72,10 +127,10 @@ export async function findJsonFiles(inputPath) {
  * @returns {Promise<Object>} Results summary
  */
 export async function processFiles(inputPath, outputPath = null, progressCallback = null) {
-  const files = await findJsonFiles(inputPath);
+  const files = await findTranslationFiles(inputPath);
 
   if (files.length === 0) {
-    throw new Error(`No JSON files found at: ${inputPath}`);
+    throw new Error(`No translation files found at: ${inputPath}`);
   }
 
   const results = {

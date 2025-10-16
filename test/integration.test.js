@@ -3,7 +3,8 @@ import assert from 'node:assert';
 import { readFile, mkdir, rm, writeFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { processFile, processFiles, findJsonFiles } from '../src/index.js';
+import yaml from 'js-yaml';
+import { processFile, processFiles, findJsonFiles, findTranslationFiles } from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -81,11 +82,15 @@ describe('Integration tests', () => {
       assert.ok(files[0].endsWith('simple.json'));
     });
 
-    test('finds all JSON files in a directory', async () => {
+    test('finds all translation files in a directory', async () => {
       const files = await findJsonFiles(fixturesDir);
 
       assert.ok(files.length > 0);
-      assert.ok(files.every(f => f.endsWith('.json')));
+      // Should find both JSON and YAML files
+      const hasJson = files.some(f => f.endsWith('.json'));
+      const hasYaml = files.some(f => f.endsWith('.yaml') || f.endsWith('.yml'));
+      assert.ok(hasJson, 'Should find JSON files');
+      assert.ok(hasYaml, 'Should find YAML files');
     });
 
     test('works with glob patterns', async () => {
@@ -191,9 +196,99 @@ describe('Integration tests', () => {
           await processFiles('/non/existent/path');
         },
         {
-          message: /No JSON files found/
+          message: /No translation files found/
         }
       );
+    });
+  });
+
+  describe('findTranslationFiles', () => {
+    test('finds YAML files in a directory', async () => {
+      const files = await findTranslationFiles(fixturesDir);
+
+      const yamlFiles = files.filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
+      assert.ok(yamlFiles.length > 0, 'Should find YAML files');
+    });
+
+    test('finds both JSON and YAML files', async () => {
+      const files = await findTranslationFiles(fixturesDir);
+
+      const jsonFiles = files.filter(f => f.endsWith('.json'));
+      const yamlFiles = files.filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
+
+      assert.ok(jsonFiles.length > 0, 'Should find JSON files');
+      assert.ok(yamlFiles.length > 0, 'Should find YAML files');
+    });
+  });
+
+  describe('YAML conversions', () => {
+    test('converts YAML file in-place', async () => {
+      const inputPath = join(tmpDir, 'test-yaml.yaml');
+      const input = { greeting: 'Hello {{name}}' };
+
+      await writeFile(inputPath, yaml.dump(input));
+
+      const result = await processFile(inputPath);
+
+      assert.strictEqual(result.success, true);
+      assert.strictEqual(result.inputFormat, 'yaml');
+      assert.strictEqual(result.outputFormat, 'yaml');
+
+      const output = yaml.load(await readFile(inputPath, 'utf-8'));
+      assert.strictEqual(output.greeting, 'Hello {name}');
+    });
+
+    test('converts YAML to JSON', async () => {
+      const inputPath = join(tmpDir, 'test-yaml-in.yaml');
+      const outputPath = join(tmpDir, 'test-json-out.json');
+      const input = { greeting: 'Hello {{name}}' };
+
+      await writeFile(inputPath, yaml.dump(input));
+
+      const result = await processFile(inputPath, outputPath);
+
+      assert.strictEqual(result.success, true);
+      assert.strictEqual(result.inputFormat, 'yaml');
+      assert.strictEqual(result.outputFormat, 'json');
+
+      const output = JSON.parse(await readFile(outputPath, 'utf-8'));
+      assert.strictEqual(output.greeting, 'Hello {name}');
+    });
+
+    test('converts JSON to YAML', async () => {
+      const inputPath = join(tmpDir, 'test-json-in.json');
+      const outputPath = join(tmpDir, 'test-yaml-out.yaml');
+      const input = { greeting: 'Hello {{name}}' };
+
+      await writeFile(inputPath, JSON.stringify(input, null, 2));
+
+      const result = await processFile(inputPath, outputPath);
+
+      assert.strictEqual(result.success, true);
+      assert.strictEqual(result.inputFormat, 'json');
+      assert.strictEqual(result.outputFormat, 'yaml');
+
+      const output = yaml.load(await readFile(outputPath, 'utf-8'));
+      assert.strictEqual(output.greeting, 'Hello {name}');
+    });
+
+    test('converts YAML plurals correctly', async () => {
+      const inputPath = join(tmpDir, 'test-yaml-plurals.yaml');
+      const input = {
+        item_zero: 'No items',
+        item_one: '{{count}} item',
+        item_other: '{{count}} items'
+      };
+
+      await writeFile(inputPath, yaml.dump(input));
+
+      const result = await processFile(inputPath);
+
+      assert.strictEqual(result.success, true);
+
+      const output = yaml.load(await readFile(inputPath, 'utf-8'));
+      assert.ok(output.item.includes('plural'));
+      assert.ok(output.item.includes('=0{No items}'));
     });
   });
 

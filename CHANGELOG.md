@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Changes that have been committed but not yet released
+- YAML file format support (.yaml and .yml files)
+- Format conversion between JSON and YAML
+- Automatic detection of file format based on extension
+- YAML test fixtures and comprehensive YAML conversion tests
+- Documentation and examples for YAML usage
 
 ## [1.0.0] - 2025-10-16
 

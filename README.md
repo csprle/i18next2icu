@@ -1,15 +1,17 @@
 # i18next2icu
 
-Convert i18next JSON translation files to ICU MessageFormat v1 with ease.
+Convert i18next JSON/YAML translation files to ICU MessageFormat v1 with ease.
 
 ## Features
 
 - Convert i18next interpolation syntax to ICU format
 - Automatically handle plural forms
+- Support for both JSON and YAML formats
+- Convert between formats (JSON ↔ YAML)
 - Process single files, entire directories, or glob patterns
 - In-place conversion or output to a separate directory
 - Beautiful CLI output with progress indicators
-- Preserves nested JSON structure
+- Preserves nested structures
 
 ## Installation
 
@@ -45,6 +47,21 @@ i18next2icu ./locales -o ./output
 Use glob patterns:
 ```bash
 i18next2icu "./locales/**/*.json" -o ./converted
+```
+
+Convert YAML files:
+```bash
+i18next2icu translations.yaml
+```
+
+Convert YAML to JSON:
+```bash
+i18next2icu input.yaml -o output.json
+```
+
+Convert JSON to YAML:
+```bash
+i18next2icu input.json -o output.yaml
 ```
 
 ### CLI Options
@@ -151,11 +168,52 @@ Options:
 }
 ```
 
+### YAML Format
+
+The converter also works with YAML files:
+
+**i18next format (YAML):**
+```yaml
+welcome: Hello {{name}}!
+item_zero: No items
+item_one: '{{count}} item'
+item_other: '{{count}} items'
+user:
+  greeting: Hello {{name}}
+  farewell: Goodbye {{name}}
+```
+
+**ICU format (YAML):**
+```yaml
+welcome: Hello {name}!
+item: '{count, plural, =0{No items} one{{count} item} other{{count} items}}'
+user:
+  greeting: Hello {name}
+  farewell: Goodbye {name}
+```
+
+### Format Conversion
+
+You can also convert between JSON and YAML:
+
+```bash
+# Convert YAML to JSON
+i18next2icu input.yaml -o output.json
+
+# Convert JSON to YAML
+i18next2icu input.json -o output.yaml
+
+# Process directory with mixed formats
+i18next2icu ./locales -o ./converted
+```
+
 ## Supported Features
 
 - ✅ Basic interpolation: `{{variable}}` → `{variable}`
 - ✅ Plural forms: `key_zero`, `key_one`, `key_other` → ICU plural syntax
 - ✅ Nested objects and deep structures
+- ✅ JSON and YAML file formats
+- ✅ Format conversion (JSON ↔ YAML)
 - ✅ Multiple files and directories
 - ⚠️ Nesting references: `$t(key)` → Converted to `[REF:key]` (requires manual handling)
 

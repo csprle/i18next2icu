@@ -1,0 +1,1 @@
+item: '{count, plural, =0{No items} one{{count} item} other{{count} items}}'

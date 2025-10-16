@@ -27,7 +27,7 @@ ${chalk.cyan('╚═════════════════════
 
 program
   .name('i18next2icu')
-  .description('Convert i18next JSON translation files to ICU MessageFormat v1')
+  .description('Convert i18next JSON/YAML translation files to ICU MessageFormat v1')
   .version(packageJson.version)
   .argument('<input>', 'Input file, directory, or glob pattern')
   .option('-o, --output <path>', 'Output directory (default: overwrites input files)')
@@ -36,7 +36,7 @@ program
 
     const outputPath = options.output || null;
     const spinner = ora({
-      text: 'Scanning for JSON files...',
+      text: 'Scanning for translation files...',
       color: 'cyan'
     }).start();
 
